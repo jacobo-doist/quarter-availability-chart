@@ -46,7 +46,7 @@ function nowScript(win, daysISO) {
     '})();\n<\/script>';
 }
 
-export function renderHtml(config, model, { generatedAt = '' } = {}) {
+export function renderHtml(config, model, { generatedAt = '', repo = null } = {}) {
   const { days, N, dayIndex, rows, monthSegs, monthBoundaries, weekSegs, weekLines, capacity, overall, window, manual, warnings } = model;
   const idx = (s) => (dayIndex.has(s) ? dayIndex.get(s) : null);
   const L = (i) => (i / N * 100).toFixed(4);
@@ -179,6 +179,11 @@ export function renderHtml(config, model, { generatedAt = '' } = {}) {
   foot.push('<div class="src">Source: HiBob' +
     (manual.length ? ' + manual additions' : '') +
     (generatedAt ? ` — generated ${esc(generatedAt)}` : '') + '.</div>');
+  if (repo) {
+    foot.push('<div class="make">Make your own — save the config below as config.json (edited for your group) and run:' +
+      `<pre class="cmd">${esc(repo.command)}</pre>` +
+      `<a href="${esc(repo.web)}">${esc(repo.web)}</a></div>`);
+  }
   foot.push(`<details class="config"><summary>Config</summary><pre>${esc(JSON.stringify(config, null, 2))}</pre></details>`);
   foot.push('</div>');
   p.push(foot.join(''));
@@ -269,6 +274,10 @@ const HEAD = `<title>__TITLE__</title>
   .foot b{color:var(--ink);}
   .foot .warn{color:#b3413a;}
   .foot .src{color:var(--ink-faint); margin-top:4px;}
+  .foot .make{margin-top:6px;}
+  .foot .make .cmd{margin:8px 0; padding:10px 12px; background:var(--ground); border:1px solid var(--border);
+    border-radius:8px; overflow-x:auto; color:var(--ink); white-space:pre;}
+  .foot .make a{color:var(--timeoff);}
   .config summary{cursor:pointer; color:var(--ink-soft); width:fit-content;}
   .config pre{margin:8px 0 0; padding:12px 14px; background:var(--ground); border:1px solid var(--border);
     border-radius:8px; overflow-x:auto; font-size:.72rem; line-height:1.5; color:var(--ink);}

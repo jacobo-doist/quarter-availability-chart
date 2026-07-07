@@ -51,6 +51,21 @@ const EXAMPLE_CONFIG = JSON.stringify({
   ],
 }, null, 2);
 
+// Derive the self-serve npx command + web link from package.json's repository,
+// so a discovered chart tells the reader how to reproduce it.
+function repoInfo() {
+  try {
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    const url = (pkg.repository && (pkg.repository.url || pkg.repository)) || '';
+    const m = /github\.com[/:]([^/]+)\/(.+?)(?:\.git)?$/.exec(url);
+    if (!m) return null;
+    const slug = `${m[1]}/${m[2]}`;
+    return { web: `https://github.com/${slug}`, command: `npx github:${slug} --config config.json` };
+  } catch {
+    return null;
+  }
+}
+
 function needConfig(lead) {
   process.stderr.write(`${lead}\n\nSave a config like this and pass it with --config <path>:\n\n${EXAMPLE_CONFIG}\n`);
   process.exit(1);
@@ -87,7 +102,7 @@ export function run(argv) {
 
   const model = buildModel(config, people, whosout, window);
   const generatedAt = new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
-  writeFileSync(args.out, renderHtml(config, model, { generatedAt }));
+  writeFileSync(args.out, renderHtml(config, model, { generatedAt, repo: repoInfo() }));
 
   for (const w of model.warnings) process.stderr.write('WARNING: ' + w + '\n');
   process.stdout.write(`Done: ${resolve(args.out)}\n`);
