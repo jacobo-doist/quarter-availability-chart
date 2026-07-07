@@ -101,7 +101,9 @@ export function run(argv) {
   const whosout = config.members.length ? loadWhosout(iso(window[0]), iso(window[1])) : [];
 
   const model = buildModel(config, people, whosout, window);
-  const generatedAt = new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+  const now = new Date();
+  const generatedAt = `${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} at ` +
+    now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   writeFileSync(args.out, renderHtml(config, model, { generatedAt, repo: repoInfo() }));
 
   for (const w of model.warnings) process.stderr.write('WARNING: ' + w + '\n');

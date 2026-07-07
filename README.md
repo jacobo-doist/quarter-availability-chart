@@ -13,9 +13,9 @@ per-member working days, deadline countdowns, and a live "now" marker.
 
 ## Install / run
 
-You always pass an explicit `--config <path>`, and you need a `config.json` (see
-[Configure](#configure)). Running with no `--config` prints an example you can
-save and edit.
+The tool always needs an explicit `--config <path>` pointing at a `config.json`
+(see [Configure](#configure)). Run it with no `--config` to print an example you
+can save and edit.
 
 **Run without installing (npx), straight from GitHub:**
 
@@ -41,8 +41,9 @@ npm start                                   # renders using ./config.json
 node bin/quarter-availability-chart.js --config config.json --out mychart.html
 ```
 
-Each run pulls people + time off from HiBob, writes `output.html` (or `--out`),
-and prints its path. Open it in a browser — it is self-contained and shareable.
+Each run pulls people and time off from HiBob, writes `output.html` (or the file
+you pass to `--out`), and prints its path. Open it in a browser; it is
+self-contained and shareable.
 
 ## The quarter window
 
@@ -116,8 +117,8 @@ only their manual entries show, and a warning is printed.
 - **Bottom row**: squad **capacity per week** (100% = nobody out), each week
   labelled with its %.
 - **Deadline markers** with a live countdown, plus the built-in **EOQ**.
-- A **now** line and shaded elapsed region, computed in the browser at page load
-  — so a saved chart stays current.
+- A **now** line and a shaded elapsed region, both computed in the browser at
+  page load, so a saved chart stays current.
 - An expandable **Config** section in the footer with the exact JSON used.
 
 ## Rules the tool applies

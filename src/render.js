@@ -176,9 +176,8 @@ export function renderHtml(config, model, { generatedAt = '', repo = null } = {}
   // footer
   const foot = ['<div class="foot">'];
   for (const w of warnings) foot.push(`<div class="warn">⚠ ${esc(w)}</div>`);
-  foot.push('<div class="src">Source: HiBob' +
-    (manual.length ? ' + manual additions' : '') +
-    (generatedAt ? ` — generated ${esc(generatedAt)}` : '') + '.</div>');
+  foot.push('<div class="src">Source: HiBob' + (manual.length ? ' + manual additions' : '') + '.</div>');
+  if (generatedAt) foot.push(`<div class="src">Generated on ${esc(generatedAt)}.</div>`);
   if (repo) {
     foot.push('<div class="make">Make your own — save the config below as config.json (edited for your group) and run:' +
       `<pre class="cmd">${esc(repo.command)}</pre>` +
