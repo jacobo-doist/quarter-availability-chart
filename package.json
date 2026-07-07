@@ -1,0 +1,17 @@
+{
+  "name": "quarter-availability-chart",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Render a group's availability for a Doist quarter as an HTML chart",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jacobo-doist/quarter-availability-chart.git"
+  },
+  "bin": { "quarter-availability-chart": "bin/quarter-availability-chart.js" },
+  "files": ["bin", "src"],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node bin/quarter-availability-chart.js --config config.json"
+  }
+}
