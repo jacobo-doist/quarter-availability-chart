@@ -31,18 +31,35 @@ function nowScript(win, daysISO) {
     '  document.querySelectorAll("[data-deadline]").forEach(function(el){\n' +
     '    var d=Math.round((Date.parse(el.getAttribute("data-deadline")+"T00:00:00Z")-todayMs)/DAY);\n' +
     '    var s=d>0?("in "+plur(d)):d===0?"today":(plur(-d)+" ago");\n' +
-    '    var c=document.createElement("span");c.className="cd";c.textContent=" — "+s;el.appendChild(c);\n' +
+    '    var c=document.createElement("span");c.className="cd";c.textContent=s;el.appendChild(c);\n' +
     '  });\n' +
-    '  if(today<WIN[0]||today>WIN[1])return;\n' +
-    '  var N=DAYS.length, now=0; while(now<N&&DAYS[now]<today)now++;\n' +
-    '  var left=(now/N*100).toFixed(4)+"%";\n' +
-    '  var plot=document.querySelector(".plot");\n' +
-    '  if(plot){\n' +
-    '    if(now>0){var e=document.createElement("div");e.className="elapsed";e.style.width=(now/N*100).toFixed(4)+"%";plot.insertBefore(e,plot.firstChild);}\n' +
-    '    var m=document.createElement("div");m.className="mark now";m.style.left=left;plot.appendChild(m);\n' +
-    '  }\n' +
     '  var lane=document.querySelector(".axisrow.bottom .lane");\n' +
-    '  if(lane){var l=document.createElement("div");l.className="blab now";l.style.left=left;l.textContent="now";lane.appendChild(l);}\n' +
+    '  if(today>=WIN[0]&&today<=WIN[1]){\n' +
+    '    var N=DAYS.length, now=0; while(now<N&&DAYS[now]<today)now++;\n' +
+    '    var left=(now/N*100).toFixed(4)+"%";\n' +
+    '    var plot=document.querySelector(".plot");\n' +
+    '    if(plot){\n' +
+    '      if(now>0){var e=document.createElement("div");e.className="elapsed";e.style.width=(now/N*100).toFixed(4)+"%";plot.insertBefore(e,plot.firstChild);}\n' +
+    '      var m=document.createElement("div");m.className="mark now";m.style.left=left;plot.appendChild(m);\n' +
+    '    }\n' +
+    '    if(lane){var l=document.createElement("div");l.className="blab now";l.style.left=left;l.textContent="now";lane.appendChild(l);}\n' +
+    '  }\n' +
+    '  function stack(){\n' +
+    '    if(!lane)return;\n' +
+    '    var labels=[].slice.call(lane.querySelectorAll(".blab"));\n' +
+    '    labels.forEach(function(el){el.style.top="";}); lane.style.height="";\n' +
+    '    var rowH=0; labels.forEach(function(el){var h=el.getBoundingClientRect().height; if(h>rowH)rowH=h;}); rowH+=4;\n' +
+    '    labels.sort(function(a,b){return a.getBoundingClientRect().left-b.getBoundingClientRect().left;});\n' +
+    '    var rows=[], gap=6, base=2;\n' +
+    '    labels.forEach(function(el){\n' +
+    '      var box=el.getBoundingClientRect(), placed=-1;\n' +
+    '      for(var i=0;i<rows.length;i++){if(box.left>=rows[i]+gap){placed=i;break;}}\n' +
+    '      if(placed<0){placed=rows.length;rows.push(0);}\n' +
+    '      rows[placed]=box.right; el.style.top=(base+placed*rowH)+"px";\n' +
+    '    });\n' +
+    '    if(rows.length>1)lane.style.height=(base+rows.length*rowH)+"px";\n' +
+    '  }\n' +
+    '  stack(); window.addEventListener("resize",stack);\n' +
     '})();\n<\/script>';
 }
 
@@ -195,7 +212,9 @@ export function renderHtml(config, model, { generatedAt = '', repo = null } = {}
   return p.join('\n') + '\n';
 }
 
-const HEAD = `<title>__TITLE__</title>
+const HEAD = `<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
 <style>
   :root{
     --ground:#f6f7f9; --surface:#fff; --ink:#1a2230; --ink-soft:#5a6576; --ink-faint:#8a94a4;
@@ -254,21 +273,22 @@ const HEAD = `<title>__TITLE__</title>
   .capsum .rn{color:var(--cap);}
   .plot{position:relative;}
   .grid-l{position:absolute; top:0; bottom:0; width:1px; background:var(--grid);}
-  .elapsed{position:absolute; top:0; bottom:0; left:0; background:color-mix(in srgb,var(--ink-soft) 7%,transparent);}
-  .area{position:absolute; top:0; bottom:0; border-radius:4px;
-    background:color-mix(in srgb,var(--ink-faint) 12%,transparent);
+  .elapsed{position:absolute; top:0; bottom:0; left:0; background:color-mix(in srgb,var(--ink-soft) 9%,transparent);}
+  .plot .area{position:absolute; top:0; bottom:0; border-radius:4px;
+    background:repeating-linear-gradient(45deg,
+      color-mix(in srgb,var(--ink-faint) 17%,transparent) 0 5px, transparent 5px 11px);
     border-left:1px dashed var(--ink-faint); border-right:1px dashed var(--ink-faint);}
-  .mark{position:absolute; top:-4px; bottom:0; width:2px; z-index:6; background:var(--ink-soft);}
-  .mark.now{width:0; background:none; border-left:2px dashed var(--ink-soft);}
+  .plot .mark{position:absolute; top:-4px; bottom:0; width:2px; z-index:6; background:var(--ink-soft);}
+  .plot .mark.now{width:0; background:none; border-left:2px dashed var(--ink-soft);}
   .bar{position:absolute; height:22px; border-radius:6px; display:flex; align-items:center; padding:0 6px;
     overflow:hidden; z-index:3; background:var(--timeoff);}
   .bar .bl{font-family:var(--mono); font-size:.63rem; font-weight:600; white-space:nowrap; color:#fff;}
-  .blab{position:absolute; top:2px; transform:translateX(-50%); white-space:nowrap;
+  .blab{position:absolute; top:2px; transform:translateX(-50%); white-space:nowrap; text-align:center; line-height:1.35;
     font-family:var(--mono); font-size:.66rem; font-weight:600;}
   .blab.area{color:var(--ink-soft); border:1px solid var(--ink-faint); padding:2px 7px; border-radius:5px;}
   .blab.mark, .blab.now{color:var(--ink-soft);}
   .blab.end{transform:translateX(-100%);}
-  .blab .cd{font-weight:400; opacity:.8;}
+  .blab .cd{display:block; font-weight:400; opacity:.8;}
   .foot{margin-top:22px; font-size:.76rem; color:var(--ink-soft); font-family:var(--mono); display:flex; flex-direction:column; gap:4px;}
   .foot b{color:var(--ink);}
   .foot .warn{color:#b3413a;}
